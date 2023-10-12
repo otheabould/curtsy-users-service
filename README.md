@@ -1,4 +1,5 @@
-# Serverless Dynamodb Template
+# Curtys Users Service
+A basic CRUD api using AWS HttpApi and Dynamodb
 
 ## Installation/deployment instructions
 

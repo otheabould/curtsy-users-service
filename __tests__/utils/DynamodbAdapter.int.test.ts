@@ -1,7 +1,7 @@
 import DynamodbAdapter from "@utils/DynamodbAdapter";
 
 const region = process.env.region;
-const tableName = process.env.tableName;
+const tableName = process.env.DYNAMODB_TABLE;
 
 describe("DynamoDB Adapter", () => {
   it("should query by field", async () => {

@@ -1,9 +1,9 @@
 import type { AWS } from "@serverless/typescript";
 
-import { createTodo, getTodo, updateTodo, deleteTodo } from "@handlers/index";
+import { createUser } from "@handlers/index";
 
 const serverlessConfiguration: AWS = {
-  service: 'curtsy-users-service',
+  service: "curtsy-users-service",
   frameworkVersion: "3",
   plugins: [
     "serverless-iam-roles-per-function",
@@ -26,26 +26,47 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
 
+      DYNAMODB_TABLE: "${param:dynamodbTableName}",
+      DYNAMODB_EMAIL_GSI: "${param:dynamodbEmailGSI}",
+
       // vars for tests
-      httpApiGatewayEndpointId: { Ref: "HttpApi" },
-      tableName: "${param:dynamodbTable}",
       stage: "${self:provider.stage}",
       region: "${self:provider.region}",
       service: "${self:service}",
+      apiBaseURL: "${param:apiBaseURL}",
     },
   },
   // import the function via paths
-  functions: { createTodo, getTodo, updateTodo, deleteTodo },
+  functions: { createUser },
 
   params: {
     default: {
       httpApiGatewayEndpointId: "${Ref HttpApi}",
-      dynamodbTable: "${self:service}-${self:provider.stage}",
+
+      dynamodbTableName: "${self:service}-${self:provider.stage}",
+      dynamodbEmailGSI: "emailIndex",
+
       dynamodbArn: {
-        "Fn::GetAtt": ["DynamoDb", "Arn"],
+        "Fn::Sub":
+          "arn:aws:dynamodb:${self:provider.region}:${AWS::AccountId}:table/${param:dynamodbTableName}",
       },
-      dynamodbStreamArn: {
-        "Fn::GetAtt": ["DynamoDb", "StreamArn"],
+      dynamodbEmailGsiArn: {
+        "Fn::Join": [
+          "",
+          ["${param:dynamodbArn}", "/index/${param:dynamodbEmailGSI}"],
+        ],
+      },
+      apiBaseURL: {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              Ref: "HttpApi",
+            },
+            ".execute-api.${self:provider.region}.amazonaws.com",
+          ],
+        ],
       },
     },
   },
@@ -87,10 +108,14 @@ const serverlessConfiguration: AWS = {
       DynamoDb: {
         Type: "AWS::DynamoDB::Table",
         Properties: {
-          TableName: "${param:dynamodbTable}",
+          TableName: "${param:dynamodbTableName}",
           AttributeDefinitions: [
             {
               AttributeName: "id",
+              AttributeType: "S",
+            },
+            {
+              AttributeName: "email",
               AttributeType: "S",
             },
           ],
@@ -101,6 +126,21 @@ const serverlessConfiguration: AWS = {
             },
           ],
           BillingMode: "PAY_PER_REQUEST",
+
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: "${param:dynamodbEmailGSI}",
+              KeySchema: [
+                {
+                  AttributeName: "email",
+                  KeyType: "HASH",
+                },
+              ],
+              Projection: {
+                ProjectionType: "ALL",
+              },
+            },
+          ],
         },
       },
     },

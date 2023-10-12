@@ -13,8 +13,13 @@ export default {
   iamRoleStatements: [
     {
       Effect: "Allow",
-      Action: ["dynamodb:PutItem", "dynamodb:UpdateItem"],
+      Action: ["dynamodb:PutItem"],
       Resource: "${param:dynamodbArn}",
+    },
+    {
+      Effect: "Allow",
+      Action: ["dynamodb:Query"],
+      Resource: "${param:dynamodbEmailGsiArn}",
     },
   ],
 };
