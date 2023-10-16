@@ -12,7 +12,6 @@ describe("getUser", () => {
     const user = await createTestUser();
     const actual = await getUser(db, user.id);
 
-    expect(actual).toBeTruthy();
     expect(actual).toEqual(user);
   });
 });

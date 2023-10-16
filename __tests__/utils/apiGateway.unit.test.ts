@@ -20,7 +20,7 @@ describe("apiResponses", () => {
     });
 
     it("should add the correct headers", () => {
-      const actual = apiResponses._DefineResponse(200, {}).headers;
+      const actual = apiResponses._200({ message: "hello" }).headers;
 
       expect(actual["Access-Control-Allow-Origin"]).toBe("*");
       expect(actual["Access-Control-Allow-Credentials"]).toBe(true);
@@ -37,7 +37,7 @@ describe("apiResponses", () => {
     });
 
     it("should add the correct headers", () => {
-      const actual = apiResponses._DefineResponse(200, {}).headers;
+      const actual = apiResponses._400("hello").headers;
 
       expect(actual["Access-Control-Allow-Origin"]).toBe("*");
       expect(actual["Access-Control-Allow-Credentials"]).toBe(true);
@@ -63,7 +63,7 @@ describe("apiResponses", () => {
     });
 
     it("should add the correct headers", () => {
-      const actual = apiResponses._DefineResponse(200, {}).headers;
+      const actual = apiResponses._409("hello").headers;
 
       expect(actual["Access-Control-Allow-Origin"]).toBe("*");
       expect(actual["Access-Control-Allow-Credentials"]).toBe(true);
@@ -80,7 +80,7 @@ describe("apiResponses", () => {
     });
 
     it("should add the correct headers", () => {
-      const actual = apiResponses._DefineResponse(200, {}).headers;
+      const actual = apiResponses._500("hello").headers;
 
       expect(actual["Access-Control-Allow-Origin"]).toBe("*");
       expect(actual["Access-Control-Allow-Credentials"]).toBe(true);

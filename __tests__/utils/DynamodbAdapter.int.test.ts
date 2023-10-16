@@ -1,68 +1,112 @@
+import { getFakeID } from "@testHelpers/fakes";
 import DynamodbAdapter from "@utils/DynamodbAdapter";
 
 const region = process.env.region;
 const tableName = process.env.DYNAMODB_TABLE;
 
 describe("DynamoDB Adapter", () => {
-  it("should query by field", async () => {
-    // GIVEN
-    const db = new DynamodbAdapter(region, tableName);
+  describe("queryByField", () => {
+    it("should return an empty array if no items are found", async () => {
+      const db = new DynamodbAdapter(region, tableName);
+      const actual = await db.queryByField("id", "fake-fake-fake");
+      expect(actual).toEqual([]);
+    });
 
-    // WHEN
-    const results = await db.queryByField("id", "fake-fake-fake");
+    it("should return the matching items", async () => {
+      const db = new DynamodbAdapter(region, tableName);
 
-    // THEN
-    expect(results).toEqual([]);
+      const item1 = {
+        id: await getFakeID(),
+        type: "test",
+      };
+      const item2 = {
+        id: await getFakeID(),
+        type: "test 2",
+      };
+
+      await db.create(item1);
+      await db.create(item2);
+
+      const actual = await db.queryByField("id", item1.id);
+      const expected = [item1];
+
+      expect(actual).toEqual(expected);
+    });
   });
 
-  it("should create & delete item", async () => {
-    // GIVEN
-    const db = new DynamodbAdapter(region, tableName);
+  describe("query", () => {
+    it("should return an empty array if no items are found", async () => {
+      const db = new DynamodbAdapter(region, tableName);
 
-    const paramsCreate = {
-      id: "SampleId",
-      Type: "SampleId",
-    };
+      const condition = "#id = :id";
+      const attributeNames = { "#id": "id" };
+      const attributevalues = { ":id": "random id" };
 
-    const paramsDelete = {
-      id: "SampleId",
-    };
+      const actual = await db.query(condition, attributeNames, attributevalues);
 
-    // WHEN
-    const createResult = await db.create(paramsCreate);
-    await db.delete(paramsDelete);
+      expect(actual).toEqual([]);
+    });
 
-    const check = await db.queryByField("id", "SampleId");
+    it("should return the matching items", async () => {
+      const db = new DynamodbAdapter(region, tableName);
 
-    // THEN
-    expect(createResult).toEqual(paramsCreate);
-    expect(check.length).toBe(0);
+      const item1 = {
+        id: await getFakeID(),
+        type: "test",
+      };
+      const item2 = {
+        id: await getFakeID(),
+        type: "test 2",
+      };
+
+      await db.create(item1);
+      await db.create(item2);
+
+      const condition = "#id = :id";
+      const attributeNames = { "#id": "id" };
+      const attributevalues = { ":id": item1.id };
+
+      const actual = await db.query(condition, attributeNames, attributevalues);
+
+      const expected = [item1];
+
+      expect(actual).toEqual(expected);
+    });
   });
 
-  it("should get an item", async () => {
-    // GIVEN
-    const db = new DynamodbAdapter(region, tableName);
+  describe("get & create", () => {
+    it("should get and create an item", async () => {
+      const db = new DynamodbAdapter(region, tableName);
 
-    const paramsCreate = {
-      id: "SampleId",
-      Type: "SampleId",
-    };
+      const id = await getFakeID();
 
-    const paramsDelete = {
-      id: "SampleId",
-    };
+      const paramsCreate = {
+        id,
+        Type: "SampleId",
+      };
+      await db.create(paramsCreate);
 
-    const paramsGet = { id: "SampleId" };
+      const actual = await db.get({ id });
 
-    // WHEN
-    const createResult = await db.create(paramsCreate);
-    const getResult = await db.get(paramsGet);
-    await db.delete(paramsDelete);
-    const check = await db.queryByField("id", "SampleId");
+      expect(actual).toEqual(paramsCreate);
+    });
+  });
 
-    // THEN
-    expect(createResult).toEqual(paramsCreate);
-    expect(getResult).toEqual(paramsCreate);
-    expect(check.length).toBe(0);
+  describe("delete", () => {
+    it("should delete an item by it's primary key", async () => {
+      const db = new DynamodbAdapter(region, tableName);
+
+      const id = await getFakeID();
+
+      const paramsCreate = {
+        id,
+        Type: "SampleId",
+      };
+      await db.create(paramsCreate);
+      await db.delete({ id });
+
+      const queryResult = await db.queryByField("id", id);
+      expect(queryResult).toEqual([]);
+    });
   });
 });

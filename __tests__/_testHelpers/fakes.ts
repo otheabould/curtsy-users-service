@@ -32,3 +32,8 @@ export const getFakeEmail = async () => {
   const uuid = (await KSUID.random()).string.toLowerCase();
   return `${uuid}@test.com`;
 };
+
+export const getFakeID = async () => {
+  const uuid = (await KSUID.random()).string.toLowerCase();
+  return uuid;
+};

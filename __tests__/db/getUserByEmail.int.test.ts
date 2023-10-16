@@ -10,10 +10,8 @@ describe("getUserByEmail", () => {
     );
 
     const user = await createTestUser();
-
     const actual = await getUserByEmail(db, user.email);
 
-    expect(actual).toBeTruthy();
     expect(actual).toEqual(user);
   });
 });
