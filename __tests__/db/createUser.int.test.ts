@@ -1,5 +1,5 @@
 import { User } from "@entities/User";
-import { generateID } from "@handlers/createUser/factory";
+import { generateID } from "@utils/mapping";
 import DynamodbAdapter from "@utils/DynamodbAdapter";
 import createUser from "@db/createUser";
 import getUser from "@db/getUser";

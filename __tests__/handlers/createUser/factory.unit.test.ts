@@ -1,8 +1,4 @@
-import {
-  generateID,
-  hashPassword,
-  newUser,
-} from "@handlers/createUser/factory";
+import { newUser } from "@handlers/createUser/factory";
 import { SchemaBody } from "@handlers/createUser/schema";
 
 describe("factory", () => {
@@ -49,41 +45,6 @@ describe("factory", () => {
       expect(user.createdAt).toBeGreaterThanOrEqual(now - 100);
       expect(user.updatedAt).toBeLessThanOrEqual(now);
       expect(user.updatedAt).toBeGreaterThanOrEqual(now - 100);
-    });
-  });
-
-  describe("generateID", () => {
-    it("should return a new id", () => {
-      const now = Date.now();
-      const actual = generateID(now);
-
-      expect(actual.length).toBeGreaterThan(0);
-    });
-
-    it("should generate a random ID", () => {
-      const now = Date.now();
-      const id1 = generateID(now);
-      const id2 = generateID(now);
-
-      expect(id1).not.toEqual(id2);
-    });
-  });
-
-  describe("hashPassword", () => {
-    it("should return a new hashed password", () => {
-      const password = "fake password";
-      const actual = hashPassword(password);
-
-      expect(actual.length).toBeGreaterThan(0);
-    });
-
-    it("should return a random hash", () => {
-      const password = "fake password";
-
-      const hash1 = hashPassword(password);
-      const hash2 = hashPassword(password);
-
-      expect(hash1).not.toEqual(hash2);
     });
   });
 });
