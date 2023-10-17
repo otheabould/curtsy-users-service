@@ -40,7 +40,7 @@ describe("factory", () => {
 
       const user = newUser(userRequest);
       const now = Date.now();
-      console.log(`user.createdAt: ${user.createdAt} now: ${now}`);
+
       expect(user.createdAt).toBeLessThanOrEqual(now);
       expect(user.createdAt).toBeGreaterThanOrEqual(now - 100);
       expect(user.updatedAt).toBeLessThanOrEqual(now);

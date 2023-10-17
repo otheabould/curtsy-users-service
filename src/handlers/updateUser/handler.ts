@@ -7,39 +7,29 @@ import { transpileSchema } from "@middy/validator/transpile";
 import DynamodbAdapter from "@utils/DynamodbAdapter";
 import { apiResponses, ValidatedHttpApiHandler } from "@utils/apiGateway";
 import { newUserResponse } from "@entities/User";
-import createUser from "@db/createUser";
 
 import { schema, SchemaBody } from "./schema";
-import { newUser } from "./factory";
-import getUserByEmail from "@db/getUserByEmail";
 import logger from "@utils/logger";
-import { formatEmail } from "@utils/mapping";
+import { newUpdateParams } from "./factory";
+import updateUser from "@db/updateUser";
 
 const log = logger(__filename);
 
 const handler: ValidatedHttpApiHandler<SchemaBody> = async (event) => {
   try {
+    const { id } = event.pathParameters;
     const db = new DynamodbAdapter(
       process.env.region,
       process.env.DYNAMODB_TABLE,
     );
 
-    const email = formatEmail(event.body.email);
-
-    const existingUser = await getUserByEmail(db, email);
-    if (existingUser) {
-      return apiResponses._409(
-        "A user with the provided email already exists.",
-      );
-    }
-
-    const user = newUser(event.body);
-    await createUser(db, user);
+    const updateParams = newUpdateParams(event.body);
+    const user = await updateUser(db, id, updateParams);
 
     const userResponse = newUserResponse(user);
     return apiResponses._200(userResponse);
   } catch (error) {
-    log("Error : ", { error });
+    log("Error: ", { error });
     return apiResponses._500(error.message);
   }
 };
