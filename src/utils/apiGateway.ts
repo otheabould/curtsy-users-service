@@ -14,9 +14,9 @@ export type ValidatedHttpApiHandler<S = never> = Handler<
 >;
 
 export const apiResponses = {
-  _DefineResponse(
+  _DefineResponse<T>(
     statusCode: number,
-    data: Record<string, unknown>,
+    data: T,
   ): APIGatewayProxyStructuredResultV2 {
     const response: APIGatewayProxyStructuredResultV2 = {
       statusCode: statusCode,
