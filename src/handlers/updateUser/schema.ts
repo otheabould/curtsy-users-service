@@ -1,3 +1,4 @@
+import { strongPasswordRegex } from "@utils/regexp";
 import type { FromSchema } from "json-schema-to-ts";
 
 export const schema = {
@@ -16,7 +17,7 @@ export const schema = {
         password: {
           type: "string",
           description: "The user's password.",
-          pattern: "^(?=.*?[a-zA-Z])(?=.*?[0-9]).{10,}$",
+          pattern: strongPasswordRegex.toString(),
         },
         name: {
           type: "string",
