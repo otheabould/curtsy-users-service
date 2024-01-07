@@ -6,7 +6,7 @@ import { createTestUser } from "@testHelpers/fakes";
 
 const baseUrl = process.env.apiBaseURL;
 
-describe("createUser handler", () => {
+describe("updateUser handler", () => {
   it("should respond with statusCode 200 to correct request", async () => {
     const testUser = await createTestUser();
     const userID = testUser.id;
@@ -47,7 +47,28 @@ describe("createUser handler", () => {
     expect(actual.avatarS3Key).toBe("updated s3 key");
   });
 
+  it("should respond with Not Found 404 with an invalid user id", async () => {
+    const userID = "invalidID";
+
+    const payload: SchemaBody = {
+      password: "updated123@",
+      name: "fake name - updated",
+      avatarS3Key: "updated s3 key",
+    };
+
+    let actual;
+    try {
+      await axios.put(`${baseUrl}/${userID}`, payload);
+    } catch (e) {
+      actual = e.response;
+    }
+
+    expect(actual.status).toBe(404);
+    expect(actual.statusText).toBe("Not Found");
+  });
+
   it("should respond with Bad Request 400 with an empty name", async () => {
+    const userID = "randomID";
     const wrongPayload = {
       name: "",
       password: "fakepassword11@@",
@@ -56,7 +77,7 @@ describe("createUser handler", () => {
 
     let actual;
     try {
-      await axios.post(`${baseUrl}`, wrongPayload);
+      await axios.put(`${baseUrl}/${userID}`, wrongPayload);
     } catch (e) {
       actual = e.response;
     }
@@ -66,14 +87,16 @@ describe("createUser handler", () => {
   });
 
   it("should respond with Bad Request 400 with an empty password", async () => {
+    const userID = "randomID";
     const wrongPayload = {
+      password: "",
       name: "Obi-Wan",
       avatarS3Key: null,
     };
 
     let actual;
     try {
-      await axios.post(`${baseUrl}`, wrongPayload);
+      await axios.put(`${baseUrl}/${userID}`, wrongPayload);
     } catch (e) {
       actual = e.response;
     }
@@ -83,6 +106,7 @@ describe("createUser handler", () => {
   });
 
   it("should respond with Bad Request 400 with a week password", async () => {
+    const userID = "randomID";
     const wrongPayload = {
       name: "Obi-Wan",
       password: "fakepassword@@",
@@ -91,7 +115,7 @@ describe("createUser handler", () => {
 
     let actual;
     try {
-      await axios.post(`${baseUrl}`, wrongPayload);
+      await axios.put(`${baseUrl}/${userID}`, wrongPayload);
     } catch (e) {
       actual = e.response;
     }

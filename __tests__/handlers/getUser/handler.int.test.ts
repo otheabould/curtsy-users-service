@@ -24,10 +24,10 @@ describe("getUser handler", () => {
     expect(actual.name).toBe(user.name);
   });
 
-  it("should respond with 404 error for an incorrect id", async () => {
+  it("should respond with Not Found 404 for an incorrect id", async () => {
     let actual;
     try {
-      const fakeID = "sadfasdfasdf";
+      const fakeID = "invalidID";
       await axios.get(`${baseUrl}/${fakeID}`);
     } catch (e) {
       actual = e.response;

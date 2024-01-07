@@ -12,6 +12,7 @@ import { schema, SchemaBody } from "./schema";
 import logger from "@utils/logger";
 import { newUpdateParams } from "./factory";
 import updateUser from "@db/updateUser";
+import getUser from "@db/getUser";
 
 const log = logger(__filename);
 
@@ -22,6 +23,11 @@ const handler: ValidatedHttpApiHandler<SchemaBody> = async (event) => {
       process.env.region,
       process.env.DYNAMODB_TABLE,
     );
+
+    const existingUser = await getUser(db, id);
+    if (!existingUser) {
+      return apiResponses._404("User not found.");
+    }
 
     const updateParams = newUpdateParams(event.body);
     const user = await updateUser(db, id, updateParams);

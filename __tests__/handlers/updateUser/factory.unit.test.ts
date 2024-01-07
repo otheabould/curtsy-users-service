@@ -2,7 +2,7 @@ import { newUpdateParams } from "@handlers/updateUser/factory";
 import { SchemaBody } from "@handlers/updateUser/schema";
 
 describe("factory", () => {
-  describe("newUser", () => {
+  describe("newUpdateParams", () => {
     it("should map the existing fields", () => {
       const userRequest: SchemaBody = {
         password: "fake password",
