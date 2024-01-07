@@ -105,14 +105,16 @@ export default class DynamodbAdapter {
   ): Promise<T> {
     const {
       UpdateExpression,
+      ConditionExpression,
       ExpressionAttributeNames,
       ExpressionAttributeValues,
-    } = this._generateUpdateExpression(updateVals);
+    } = this._generateUpdateExpression(Key, updateVals);
 
     const params: DocumentClient.UpdateItemInput = {
       TableName: this.tableName,
       Key,
       UpdateExpression,
+      ConditionExpression,
       ExpressionAttributeNames,
       ExpressionAttributeValues,
       ReturnValues: "ALL_NEW",
@@ -123,27 +125,41 @@ export default class DynamodbAdapter {
   }
 
   _generateUpdateExpression(
+    Key: Record<string, DocumentClient.AttributeValue>,
     updateVals: Record<string, DocumentClient.AttributeValue>,
   ): {
     UpdateExpression: string;
+    ConditionExpression: string;
     ExpressionAttributeNames: Record<string, string>;
     ExpressionAttributeValues: Record<string, DocumentClient.AttributeValue>;
   } {
-    let expression = "SET ";
+    const updateExpressionParts: string[] = [];
+    const conditionExpressionParts: string[] = [];
+
     const attributeNames: Record<string, string> = {};
     const attibuteValues: Record<string, DocumentClient.AttributeValue> = {};
 
     for (const [key, value] of Object.entries(updateVals)) {
-      expression += ` #${key} = :${key},`;
+      updateExpressionParts.push(`#${key} = :${key}`);
+
+      attributeNames[`#${key}`] = key;
+      attibuteValues[`:${key}`] = value;
+    }
+
+    for (const [key, value] of Object.entries(Key)) {
+      conditionExpressionParts.push(`#${key} = :${key}`);
+
       attributeNames[`#${key}`] = key;
       attibuteValues[`:${key}`] = value;
     }
 
     // remove the trailing comma
-    expression = expression.slice(0, expression.length - 1);
+    const updateExpression = `SET ${updateExpressionParts.join(", ")}`;
+    const conditionExpression = conditionExpressionParts.join(" AND ");
 
     return {
-      UpdateExpression: expression,
+      UpdateExpression: updateExpression,
+      ConditionExpression: conditionExpression,
       ExpressionAttributeNames: attributeNames,
       ExpressionAttributeValues: attibuteValues,
     };
