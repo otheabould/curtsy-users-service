@@ -15,7 +15,7 @@ export const schema = {
         password: {
           type: "string",
           description: "The user's password.",
-          pattern: strongPasswordRegex.toString(),
+          pattern: strongPasswordRegex,
         },
         name: {
           type: "string",
