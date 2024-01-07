@@ -1,6 +1,12 @@
 import type { AWS } from "@serverless/typescript";
 
-import { createUser, getUser, deleteUser, updateUser } from "@handlers/index";
+import {
+  createUser,
+  getUser,
+  deleteUser,
+  updateUser,
+  authenticateUser,
+} from "@handlers/index";
 
 const serverlessConfiguration: AWS = {
   service: "curtsy-users-service",
@@ -37,7 +43,7 @@ const serverlessConfiguration: AWS = {
     },
   },
   // import the function via paths
-  functions: { createUser, getUser, deleteUser, updateUser },
+  functions: { createUser, getUser, deleteUser, updateUser, authenticateUser },
 
   params: {
     default: {
